@@ -1,0 +1,22 @@
+#!/usr/bin/env ruby
+#
+# launch a dmenu interface for mpd
+#
+###
+
+# retrieve content and send commands to mpd
+require 'ruby-mpd'
+# outline menu structure
+require_relative 'menu_struct/MusicMenus'
+# parse menu structure as dmenu menus
+require_relative 'mvc/DmenuView'
+# render and navigate menues, control mpd
+require_relative 'mvc/MusicController'
+
+
+mpd = MPD.new
+mpd.connect
+view = DmenuView.new(mpd)
+controller = MusicController.new(view, mpd)
+controller.main_menu(MusicMenus::MAIN)
+mpd.disconnect
