@@ -17,6 +17,6 @@ require_relative 'mvc/MusicController'
 mpd = MPD.new
 mpd.connect
 view = DmenuView.new(mpd)
-controller = MusicController.new(view, mpd)
-controller.main_menu(MusicMenus::MAIN)
+controller = MusicController.new(view, mpd, MusicMenus::MAIN)
+controller.view_and_parse
 mpd.disconnect
