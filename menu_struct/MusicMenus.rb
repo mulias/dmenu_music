@@ -1,9 +1,11 @@
 module MusicMenus
 
+  # a music menu tree using MenuStructs to describe menu elements
+
   # provides Row, RowOf, and Menu structs
   require_relative 'MenuStruct'
   include MenuStruct
-
+  
   # Symbols represent methods to be called. When used as title text, the method
   # will sub in text. When as an action, the method will send a command to mpd 
   #

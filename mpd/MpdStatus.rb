@@ -1,5 +1,7 @@
 module MpdStatus
 
+  # displayed text in menus, dependent on mpd state
+  
   def play_status
     @mpd.playing? ? 'Pause' : 'Play'
   end

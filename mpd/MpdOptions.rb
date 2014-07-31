@@ -1,5 +1,10 @@
 module MpdOptions
 
+  # commands sent to mpd
+  
+  # add_music examples:
+  # music_from = 'Artist', content = 'They Might Be Giants'
+  # music_from = 'path', content = '~/username/podcasts/mike_detective'
   def add_music (music_from, content)
     @mpd.clear if !@mpd.playing? && !@mpd.paused?
     case music_from
@@ -11,6 +16,7 @@ module MpdOptions
     when 'album'
       @mpd.where(:album => content).each { |track| @mpd.add(track) }
     end
+    # if not deliberatly paused, start music
     @mpd.play if !@mpd.paused?
   end
   
