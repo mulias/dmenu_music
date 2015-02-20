@@ -12,14 +12,24 @@ module MpdOptions
     when 'path'
       @mpd.add(content)
     when 'artist'
-      @mpd.where(:artist => content).each { |track| @mpd.add(track) }
+      # add first track, then add remaining in background
+      # this prevents the menu from blocking while songs get added
+      tracks = @mpd.where(:artist => content)
+      @mpd.add(tracks.first)
+      Thread.new{ add_track_list(tracks.drop(1)) }
     when 'album'
-      @mpd.where(:album => content).each { |track| @mpd.add(track) }
+      tracks = @mpd.where(:album => content)
+      @mpd.add(tracks.first)
+      Thread.new{ add_track_list(tracks.drop(1)) }
     end
     # if not deliberatly paused, start music
     @mpd.play if !@mpd.paused?
   end
   
+  def add_track_list (tracks)
+    tracks.each { |track| @mpd.add(track) }
+  end
+
   def shuffle_queue
     @mpd.shuffle
   end
