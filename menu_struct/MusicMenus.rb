@@ -23,20 +23,29 @@ module MusicMenus
     Row.new("#{track.artist} -- #{track.title}", [:add_track, track])
   end 
    
-  album_row_format = Proc.new do |album|
-    Row.new(album, Menu.new(album,
-                            [Row.new('> Back', :back_history),
-                             Row.new('> Play Album', [:add_album, album]),
-                             RowsOf.new([:format_tracks, track_row_format, album])
-                            ]))
+  album_row_format = Proc.new do |album, artist|
+    Row.new(album, 
+	        Menu.new(album,
+	                 [Row.new('> Back', :back_history),
+                      Row.new('> Play All', [:add_album, album]),
+                      RowIf.new("> Only By #{artist}", 
+                                [:is_multi_artist, album],
+                                 Menu.new("#{artist} -- #{album}",
+                                          [Row.new('> Back', :back_history),
+                                           Row.new('> Play All', [:add_album_by_artist, album, artist]),
+                                           RowsOf.new([:format_tracks, track_row_format, album, artist])
+                                          ])),
+					  RowsOf.new([:format_tracks, track_row_format, album])
+					 ]))
   end
   
   artist_row_format = Proc.new do |artist|
-    Row.new(artist, Menu.new(artist,
-                             [Row.new('> Back', :back_history),
-                              Row.new('> Play All', [:add_artist, artist]),
-                              RowsOf.new([:format_albums, album_row_format, artist])
-                             ]))
+    Row.new(artist, 
+	        Menu.new(artist,
+                     [Row.new('> Back', :back_history),
+                      Row.new('> Play All', [:add_artist, artist]),
+                      RowsOf.new([:format_albums, album_row_format, artist])
+                     ]))
   end
    
   # full menu tree, starting from main menu
