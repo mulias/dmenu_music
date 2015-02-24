@@ -34,6 +34,16 @@ module MpdOptions
     end
   end
 
+  def add_album_by_artist (album, artist)
+    clear_and_play do
+      # add first track, then add remaining in background
+      # this prevents the menu from blocking while songs get added
+      tracks = @mpd.where(:album => album, :artist => artist)
+      @mpd.add(tracks.first)
+      Thread.new{ add_track_list(tracks.drop(1)) }
+    end
+  end
+
   def clear_and_play
     @mpd.clear if !@mpd.playing? && !@mpd.paused?
     yield
@@ -48,7 +58,7 @@ module MpdOptions
     @mpd.shuffle
   end
 
-  def swap pos
+  def swap (pos)
     current = @mpd.current_song.pos
     if current != nil && pos != current
       @mpd.move(pos, current + 1)
