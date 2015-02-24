@@ -16,7 +16,7 @@ class DmenuView
   end
 
   # basic settings for all menus
-  def dmenu_base
+  def dmenu_init
     menu = Dmenu.new
     menu.position = :bottom
     menu.font = 'Sans-10'
@@ -27,42 +27,52 @@ class DmenuView
   
   # create a dmenu object from a MenuStruct item
   def build_menu (menu_struct)
-    menu = dmenu_base
+    menu = dmenu_init
     menu.prompt = menu_struct.prompt
-    # check for rows to dynamically generate
-    rows = menu_struct.rows.flat_map do |row|
-      (row.instance_of? RowsOf) ? build_rows(row) : row
-    end
-    # turn rows into dmenu items
-    items = rows.map do |row|
-      # if text is a symbol, execute as a method that returns needed text line
-      text = (row.text.is_a? Symbol) ? send(*row.text) : row.text
-      Dmenu::Item.new(text, row.action)
-    end
-    menu.items = items
+    menu.items = build_menu_rows(format_dynamic_rows(menu_struct.rows))
     return menu
   end
-  
-  # return an array of Row structs generated with information 
-  # from a RowsOf struct
-  def build_rows (multirow)
-    # get array of data, then make one new row for each element
-    case multirow.data_set
-    when 'queued_tracks'
-      # first track in queue is the currently playing track
-      # max of 98 tracks (5 menu screens) for display speed
-      first_pos = @mpd.current_song ? @mpd.current_song.pos : 0
-      last_pos = 97 + first_pos
-      data = @mpd.queue(first_pos .. last_pos)
-    when 'artists'
-      data = @mpd.artists
-    when 'albums' 
-      data = @mpd.albums(multirow.filter)
-    when 'tracks'
-      data = @mpd.where(:album => multirow.filter)
+
+  def format_dynamic_rows (struct_rows)
+    all_rows = struct_rows.flat_map do |row|
+      (row.instance_of? RowsOf) ? send(*row.format_function) : row
     end
-    format_rows(data, multirow.formatter)
+    return all_rows
   end
+
+  def build_menu_rows (struct_rows) 
+    items = struct_rows.map do |row|
+      # if text is a symbol, execute as a method that returns needed text line
+      text = (row.text.is_a? Symbol) ? send(row.text) : row.text
+      Dmenu::Item.new(text, row.action)
+    end 
+    return items
+  end
+  
+  def format_tracks (formatter, search)
+    data = @mpd.where(:album => search)
+    format_rows(data, formatter)
+  end
+
+  def format_albums (formatter, search)
+    data = @mpd.albums(search)
+    format_rows(data, formatter)
+  end
+
+  def format_queue (formatter)
+    # first track in queue is the currently playing track
+    # max of 98 tracks (5 menu screens) for display speed
+    first_pos = @mpd.current_song ? @mpd.current_song.pos : 0
+    last_pos = 97 + first_pos
+    data = @mpd.queue(first_pos .. last_pos)
+    format_rows(data, formatter)
+  end
+
+  def format_artists (formatter)
+    data = @mpd.artists
+    format_rows(data, formatter)
+  end
+
   
   # format each Row struct as specified by the formatter proc
   def format_rows (data, formatter)
