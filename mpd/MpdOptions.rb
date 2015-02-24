@@ -2,30 +2,44 @@ module MpdOptions
 
   # commands sent to mpd
   
-  # add_music examples:
-  # music_from = 'Artist', content = 'They Might Be Giants'
-  # music_from = 'path', content = '~/username/podcasts/mike_detective'
-  def add_music (music_from, content)
-    @mpd.clear if !@mpd.playing? && !@mpd.paused?
-    case music_from
-    when 'track'
-    when 'path'
-      @mpd.add(content)
-    when 'artist'
+  def add_track (track)
+    clear_and_play do
+      @mpd.add(track)
+    end
+  end
+
+  def add_path (path)
+    clear_and_play do
+      @mpd.add(path)
+    end
+  end
+
+  def add_artist (artist)
+    clear_and_play do
       # add first track, then add remaining in background
       # this prevents the menu from blocking while songs get added
       tracks = @mpd.where(:artist => content)
       @mpd.add(tracks.first)
       Thread.new{ add_track_list(tracks.drop(1)) }
-    when 'album'
+    end
+  end
+
+  def add_album (album)
+    clear_and_play do
+      # add first track, then add remaining in background
+      # this prevents the menu from blocking while songs get added
       tracks = @mpd.where(:album => content)
       @mpd.add(tracks.first)
       Thread.new{ add_track_list(tracks.drop(1)) }
     end
-    # if not deliberatly paused, start music
+  end
+
+  def clear_and_play
+    @mpd.clear if !@mpd.playing? && !@mpd.paused?
+    yield
     @mpd.play if !@mpd.paused?
   end
-  
+
   def add_track_list (tracks)
     tracks.each { |track| @mpd.add(track) }
   end
@@ -33,6 +47,15 @@ module MpdOptions
   def shuffle_queue
     @mpd.shuffle
   end
+
+  def swap pos
+    current = @mpd.current_song.pos
+    if current != nil && pos != current
+      @mpd.move(pos, current + 1)
+      @mpd.next
+      @mpd.move(current, pos)
+    end
+  end 
 
   def toggle_play
     if !@mpd.playing? && !@mpd.paused?
