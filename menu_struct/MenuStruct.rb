@@ -22,6 +22,6 @@ module MenuStruct
   # :data_set is a symbol that tells an outside method what data to fetch for proc
   # :filter is a string to narrow the data set, such as albums for "ArtistX", 
   #   instead of all albums
-  RowsOf = Struct.new(:formatter, :data_set, :filter)
+  RowsOf = Struct.new(:format_function)
   
 end

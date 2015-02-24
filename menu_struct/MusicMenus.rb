@@ -15,27 +15,27 @@ module MusicMenus
   # variables ending in _row are procedures to generate additional rows
   
   #procedures
-  queued_track_row = Proc.new do |track| 
+  queued_row_format = Proc.new do |track| 
     Row.new("#{track.artist} -- #{track.title}", [:swap, track.pos])
   end
    
-  track_row = Proc.new do |track|
-    Row.new("#{track.artist} -- #{track.title}", [:add_music, 'track', track])
+  track_row_format = Proc.new do |track|
+    Row.new("#{track.artist} -- #{track.title}", [:add_track, track])
   end 
    
-  album_row = Proc.new do |album|
+  album_row_format = Proc.new do |album|
     Row.new(album, Menu.new(album,
                             [Row.new('> Back', :back_history),
-                             Row.new('> Play Album', [:add_music, 'album', album]),
-                             RowsOf.new(track_row, 'tracks', album )
+                             Row.new('> Play Album', [:add_album, album]),
+                             RowsOf.new([:format_tracks, track_row_format, album])
                             ]))
   end
   
-  artist_row = Proc.new do |artist|
+  artist_row_format = Proc.new do |artist|
     Row.new(artist, Menu.new(artist,
                              [Row.new('> Back', :back_history),
-                              Row.new('> Play All', [:add_music, 'artist', artist]),
-                              RowsOf.new(album_row, 'albums', artist)
+                              Row.new('> Play All', [:add_artist, artist]),
+                              RowsOf.new([:format_albums, album_row_format, artist])
                              ]))
   end
    
@@ -45,13 +45,13 @@ module MusicMenus
                            Menu.new('Queue',
                                     [Row.new('> Back', :back_history),
                                      Row.new('> Shuffle', :shuffle_queue),
-                                     RowsOf.new(queued_track_row, 'queued_tracks')
+                                     RowsOf.new([:format_queue, queued_row_format])
                                     ])),
                    Row.new('Music', 
                            Menu.new('Music',
                                     [Row.new('> Back', :back_history),
-                                     Row.new('> Play All', [:add_music, 'path', '/']),
-                                     RowsOf.new(artist_row, 'artists')
+                                     Row.new('> Play All', [:add_path, '/']),
+                                     RowsOf.new([:format_artists, artist_row_format])
                                     ])),
                    Row.new('Playlists', :back_history),
                    Row.new('Podcasts', :back_history),
