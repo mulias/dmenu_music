@@ -29,34 +29,38 @@ class DmenuView
   def build_menu (menu_struct)
     menu = dmenu_init
     menu.prompt = menu_struct.prompt
-    menu.items = build_menu_rows(format_dynamic_rows(menu_struct.rows))
+    menu.items = build_menu_rows(menu_struct.rows)
     return menu
   end
 
-  def format_dynamic_rows (struct_rows)
-    all_rows = struct_rows.flat_map do |row|
-      (row.instance_of? RowsOf) ? send(*row.format_function) : row
-    end
-    return all_rows
-  end
-
   def build_menu_rows (struct_rows) 
-    items = struct_rows.map do |row|
+    expand_rows(struct_rows).map do |row|
       # if text is a symbol, execute as a method that returns needed text line
       text = (row.text.is_a? Symbol) ? send(row.text) : row.text
       Dmenu::Item.new(text, row.action)
     end 
-    return items
   end
-  
-  def format_tracks (formatter, search)
-    data = @mpd.where(:album => search)
-    format_rows(data, formatter)
+ 
+  def expand_rows (struct_rows)
+    format_dynamic_rows(struct_rows).reject do |row| 
+      (row.instance_of? RowIf) && !send(*row.condition)
+    end
   end
 
-  def format_albums (formatter, search)
-    data = @mpd.albums(search)
-    format_rows(data, formatter)
+  def format_dynamic_rows (struct_rows)
+    struct_rows.flat_map do |row|
+      (row.instance_of? RowsOf) ? send(*row.format_function) : row
+    end
+  end
+ 
+  def format_tracks (formatter, album, artist = nil)
+    tracks = artist ? @mpd.where(:album => album, :artist => artist) :
+                      @mpd.where(:album => album)
+    tracks.map { |track| formatter.call(track) }
+  end
+
+  def format_albums (formatter, artist)
+    @mpd.albums(artist).map { |album| formatter.call(album, artist) }
   end
 
   def format_queue (formatter)
@@ -64,22 +68,18 @@ class DmenuView
     # max of 98 tracks (5 menu screens) for display speed
     first_pos = @mpd.current_song ? @mpd.current_song.pos : 0
     last_pos = 97 + first_pos
-    data = @mpd.queue(first_pos .. last_pos)
-    format_rows(data, formatter)
+    @mpd.queue(first_pos .. last_pos).map { |track| formatter.call(track) }
   end
 
   def format_artists (formatter)
-    data = @mpd.artists
-    format_rows(data, formatter)
+    @mpd.artists.map { |artist| formatter.call(artist) }
   end
 
-  
-  # format each Row struct as specified by the formatter proc
-  def format_rows (data, formatter)
-    # call the proc in MusicMenus for each row
-    data.map do |row_data|
-      formatter.call(row_data)
-    end
+  def is_multi_artist (album)
+    album_tracks = @mpd.where(:album => album)
+    an_artist = album_tracks.first.artist
+    artist_tracks = @mpd.where(:artist => an_artist, :album => album)
+    return album_tracks.count != artist_tracks.count
   end
   
 end
