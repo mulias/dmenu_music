@@ -22,6 +22,10 @@ module MusicMenus
   track_row_format = Proc.new do |track|
     Row.new("#{track.artist} -- #{track.title}", [:add_track, track])
   end 
+
+  uncategorized_row_format = Proc.new do |track|
+    Row.new("#{track.file}", [:add_track, track])
+  end
    
   album_row_format = Proc.new do |album, artist|
     Row.new(album, 
@@ -60,8 +64,15 @@ module MusicMenus
                            Menu.new('Music',
                                     [Row.new('> Back', :back_history),
                                      Row.new('> Play All', [:add_path, '/']),
-                                     RowsOf.new([:format_artists, artist_row_format])
-                                    ])),
+                                     RowsOf.new([:format_artists, artist_row_format]),
+                                     RowIf.new('__Uncategorized Music__',
+                                               :has_uncatagorized_music,
+                                               Menu.new('Uncategorized Music',
+                                               [Row.new('> Back', :back_history),
+                                                Row.new('> Play All', :add_uncategorized),
+                                                RowsOf.new([:format_tracks, uncategorized_row_format, "", ""])
+                                               ]))
+                                   ])),
                    Row.new('Playlists', :back_history),
                    Row.new('Podcasts', :back_history),
                    Row.new('Options', 
