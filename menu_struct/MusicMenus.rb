@@ -25,23 +25,23 @@ module MusicMenus
    
   album_row_format = Proc.new do |album, artist|
     Row.new(album, 
-	    Menu.new(album,
-	             [Row.new('> Back', :back_history),
+            Menu.new(album,
+                     [Row.new('> Back', :back_history),
                       Row.new('> Play All', [:add_album, album]),
                       RowIf.new("> Only By #{artist}", 
                                 [:is_multi_artist, album],
-                                 Menu.new("#{artist} -- #{album}",
-                                          [Row.new('> Back', :back_history),
-                                           Row.new('> Play All', [:add_album_by_artist, album, artist]),
-                                           RowsOf.new([:format_tracks, track_row_format, album, artist])
-                                          ])),
-	              RowsOf.new([:format_tracks, track_row_format, album])
-		     ]))
+                                Menu.new("#{artist} -- #{album}",
+                                         [Row.new('> Back', :back_history),
+                                          Row.new('> Play All', [:add_album_by_artist, album, artist]),
+                                          RowsOf.new([:format_tracks, track_row_format, album, artist])
+                                         ])),
+                      RowsOf.new([:format_tracks, track_row_format, album])
+                     ]))
   end
   
   artist_row_format = Proc.new do |artist|
     Row.new(artist, 
-	    Menu.new(artist,
+            Menu.new(artist,
                      [Row.new('> Back', :back_history),
                       Row.new('> Play All', [:add_artist, artist]),
                       RowsOf.new([:format_albums, album_row_format, artist])
@@ -76,6 +76,6 @@ module MusicMenus
                                      Row.new(:loop_list_status, :loop_list),
                                      Row.new('Update Database', :update_db)
                                     ]))
-                   ])
-                         
+                  ])
+
 end
