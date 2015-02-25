@@ -41,7 +41,7 @@ module MusicMenus
   
   artist_row_format = Proc.new do |artist|
     Row.new(artist, 
-	        Menu.new(artist,
+	    Menu.new(artist,
                      [Row.new('> Back', :back_history),
                       Row.new('> Play All', [:add_artist, artist]),
                       RowsOf.new([:format_albums, album_row_format, artist])
