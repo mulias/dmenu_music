@@ -54,12 +54,13 @@ class DmenuView
   end
  
   def format_tracks (formatter, album, artist = nil)
-    tracks = artist ? @mpd.where(:album => album, :artist => artist) :
-                      @mpd.where(:album => album)
+    tracks = artist ? @mpd.where({:album => album, :artist => artist}, {:strict => true}) :
+                      @mpd.where({:album => album}, {:strict => true})
     tracks.map { |track| formatter.call(track) }
   end
 
   def format_albums (formatter, artist)
+    return [] if artist == ""
     @mpd.albums(artist).map { |album| formatter.call(album, artist) }
   end
 
@@ -72,14 +73,21 @@ class DmenuView
   end
 
   def format_artists (formatter)
-    @mpd.artists.map { |artist| formatter.call(artist) }
+    artists = @mpd.artists
+    real_artists = artists[0] == "" ? artists.drop(1) : artists
+    real_artists.map { |artist| formatter.call(artist) }
   end
 
   def is_multi_artist (album)
-    album_tracks = @mpd.where(:album => album)
+    album_tracks = @mpd.where({:album => album}, {:strict => true})
     an_artist = album_tracks.first.artist
-    artist_tracks = @mpd.where(:artist => an_artist, :album => album)
+    artist_tracks = @mpd.where({:artist => an_artist, :album => album}, {:strict => true})
     return album_tracks.count != artist_tracks.count
   end
+
+  def has_uncatagorized_music
+    misc = @mpd.where({:artist => "", :album => ""}, {:strict => true})
+    return misc.count != 0
+  end 
   
 end

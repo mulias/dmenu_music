@@ -18,7 +18,7 @@ module MpdOptions
     clear_and_play do
       # add first track, then add remaining in background
       # this prevents the menu from blocking while songs get added
-      tracks = @mpd.where(:artist => artist)
+      tracks = @mpd.where({:artist => artist}, {:strict => true})
       @mpd.add(tracks.first)
       Thread.new{ add_track_list(tracks.drop(1)) }
     end
@@ -28,7 +28,7 @@ module MpdOptions
     clear_and_play do
       # add first track, then add remaining in background
       # this prevents the menu from blocking while songs get added
-      tracks = @mpd.where(:album => album)
+      tracks = @mpd.where({:album => album}, {:strict => true})
       @mpd.add(tracks.first)
       Thread.new{ add_track_list(tracks.drop(1)) }
     end
@@ -38,10 +38,14 @@ module MpdOptions
     clear_and_play do
       # add first track, then add remaining in background
       # this prevents the menu from blocking while songs get added
-      tracks = @mpd.where(:album => album, :artist => artist)
+      tracks = @mpd.where({:album => album, :artist => artist}, {:strict => true})
       @mpd.add(tracks.first)
       Thread.new{ add_track_list(tracks.drop(1)) }
     end
+  end
+
+  def add_uncategorized
+    add_album_by_artist("", "")
   end
 
   def clear_and_play
