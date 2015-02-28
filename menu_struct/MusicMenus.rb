@@ -16,7 +16,11 @@ module MusicMenus
   
   #procedures
   queued_row_format = Proc.new do |track| 
-    Row.new("#{track.artist} -- #{track.title}", [:swap, track.pos])
+    if track.artist == nil || track.title == nil
+      Row.new("#{track.file}", [:swap, track.pos])
+    else
+      Row.new("#{track.artist} -- #{track.title}", [:swap, track.pos])
+    end
   end
    
   track_row_format = Proc.new do |track|
