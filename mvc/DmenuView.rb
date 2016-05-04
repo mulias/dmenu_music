@@ -61,7 +61,9 @@ class DmenuView
 
   def format_albums (formatter, artist)
     return [] if artist == ""
-    @mpd.albums(artist).map { |album| formatter.call(album, artist) }
+    @mpd.where(albumartist: artist)
+        .map { |song| song.album }.uniq.compact
+        .map { |album| formatter.call(album, artist) }
   end
 
   def format_queue (formatter)
@@ -73,7 +75,7 @@ class DmenuView
   end
 
   def format_artists (formatter)
-    artists = @mpd.artists
+    artists = @mpd.list :albumartist
     real_artists = artists[0] == "" ? artists.drop(1) : artists
     real_artists.map { |artist| formatter.call(artist) }
   end
