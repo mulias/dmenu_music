@@ -59,6 +59,13 @@ class DmenuView
     tracks.map { |track| formatter.call(track) }
   end
 
+  def format_untagged_tracks (formatter)
+    tracks = @mpd.where({albumartist: ""}, {strict: true})
+    tracks.push(*@mpd.where({artist: ""}, {strict: true}))
+    tracks.push(*@mpd.where({album: ""}, {strict: true}))
+    tracks.map { |track| formatter.call(track) }
+  end
+
   def format_albums (formatter, artist)
     return [] if artist == ""
     @mpd.where(albumartist: artist)
@@ -87,9 +94,10 @@ class DmenuView
     return album_tracks.count != artist_tracks.count
   end
 
-  def has_uncatagorized_music
-    misc = @mpd.where({:artist => "", :album => ""}, {:strict => true})
-    return misc.count != 0
+  def has_untagged_music
+    @mpd.list(:albumartist).any? { |a| a == "" } ||
+    @mpd.list(:artist).any?      { |a| a == "" } ||
+    @mpd.list(:album).any?       { |a| a == "" }
   end 
   
 end

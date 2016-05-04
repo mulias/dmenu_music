@@ -27,7 +27,7 @@ module MusicMenus
     Row.new("#{track.artist} -- #{track.title}", [:add_track, track])
   end 
 
-  uncategorized_row_format = Proc.new do |track|
+  untagged_row_format = Proc.new do |track|
     Row.new("#{track.file}", [:add_track, track])
   end
    
@@ -69,11 +69,11 @@ module MusicMenus
                                     [Row.new('> Back', :back_history),
                                      Row.new('> Play All', [:add_path, '/']),
                                      RowIf.new('> Untagged Music',
-                                               :has_uncatagorized_music,
-                                               Menu.new('Uncategorized Music',
+                                               :has_untagged_music,
+                                               Menu.new('Untagged Music',
                                                [Row.new('> Back', :back_history),
                                                 Row.new('> Play All', :add_uncategorized),
-                                                RowsOf.new([:format_tracks, uncategorized_row_format, "", ""])
+                                                RowsOf.new([:format_untagged_tracks, untagged_row_format])
                                                ])),
                                      RowsOf.new([:format_artists, artist_row_format]),
                                    ])),
