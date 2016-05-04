@@ -68,14 +68,14 @@ module MusicMenus
                            Menu.new('Music',
                                     [Row.new('> Back', :back_history),
                                      Row.new('> Play All', [:add_path, '/']),
-                                     RowsOf.new([:format_artists, artist_row_format]),
-                                     RowIf.new('__Uncategorized Music__',
+                                     RowIf.new('> Untagged Music',
                                                :has_uncatagorized_music,
                                                Menu.new('Uncategorized Music',
                                                [Row.new('> Back', :back_history),
                                                 Row.new('> Play All', :add_uncategorized),
                                                 RowsOf.new([:format_tracks, uncategorized_row_format, "", ""])
-                                               ]))
+                                               ])),
+                                     RowsOf.new([:format_artists, artist_row_format]),
                                    ])),
                    Row.new('Playlists', :back_history),
                    Row.new('Podcasts', :back_history),
