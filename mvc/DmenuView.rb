@@ -19,9 +19,13 @@ class DmenuView
   def dmenu_init
     menu = Dmenu.new
     menu.position = :bottom
-    menu.font = 'Sans-10'
+    menu.font = 'Sans-8'
     menu.case_insensitive = true
     menu.lines = 20
+    menu.background = '#333333'
+    menu.foreground = '#ffffff'
+    menu.selected_background = '#285577'
+    menu.selected_foreground = '#ffffff'
     return menu
   end
   
